@@ -1,0 +1,6 @@
+base62.c
+setup.py
+base62.egg-info/PKG-INFO
+base62.egg-info/SOURCES.txt
+base62.egg-info/dependency_links.txt
+base62.egg-info/top_level.txt
