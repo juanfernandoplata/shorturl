@@ -1,7 +1,7 @@
 /trash/
 /venv/
 
-/services/url_encoder/_base62/base62.egg-info/
+/services/url_encoder/_base62/_base62.egg-info/
 /services/url_encoder/_base62/build/
 /services/url_encoder/_base62/dist/
 
