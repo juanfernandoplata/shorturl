@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+service UrlEncoder {
+    rpc encode( EncodeReq ) returns ( EncodeRes );
+}
+
+message EncodeReq {}
+
+message EncodeRes {
+    string encoded = 1;
+}

@@ -1,6 +1,8 @@
 from concurrent import futures
 
 import grpc
+
+from _grpc import tsl
 from _grpc.url_encoder_pb2_grpc import UrlEncoderServicer, add_UrlEncoderServicer_to_server
 from _grpc.url_encoder_pb2 import EncodeRes
 
@@ -17,34 +19,30 @@ class UrlEncoder( UrlEncoderServicer ):
         
         return conn_strings.split()
     
-    def get_max_short( self ):
+    def set_count( self ):
         max_short = "000000"
 
         for string in self.get_conn_strings():
-            conn = pg.connect( string )
-            
-            cur = conn.cursor()
+            print( string )
+            with pg.connect( string ) as conn:
+                with conn.cursor() as cur:
+                    cur.execute(f"""
+                        select short
+                        from url
+                        order by short desc
+                        limit 1
+                    """)
 
-            cur.execute(f"""
-                select short
-                from main.url
-                order by short desc
-                limit 1
-            """)
+                    if ( row := cur.fetchone() ) != None:
+                        if row[ 0 ] > max_short:
+                            print( "EPA" * 100 )
+                            max_short = row[ 0 ]
 
-            for row in cur.fetchall():
-                if row[ 0 ] > max_short:
-                    max_short = row[ 0 ]
-            
-            return max_short
-    
-    def get_max_id( self ):
-        return base62.decode( self.get_max_short() )
+        self.count = base62.decode( max_short )
 
     def __init__( self ):
         super().__init__()
-
-        self.count = self.get_max_id()
+        self.set_count()
     
     def gen_id( self ):
         url_id = self.count
@@ -66,7 +64,13 @@ def serve():
         server
     )
 
-    server.add_insecure_port( "[::]:50051" )
+    credentials = grpc.ssl_server_credentials(
+        [ ( tsl.SERVER_CERTIFICATE_KEY, tsl.SERVER_CERTIFICATE ) ],
+        root_certificates = tsl.ROOT_CERTIFICATES,
+        require_client_auth = True,
+    )
+
+    server.add_secure_port( "0.0.0.0:50051", credentials )
     
     server.start()
     

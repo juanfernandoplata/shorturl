@@ -1,3 +1,50 @@
 services:
+  db:
+    build:
+      context: ./services/postgres/
+      dockerfile: Dockerfile
+    
+    container_name: pg
+    
+    environment:
+      POSTGRES_USER: jfp
+      POSTGRES_PASSWORD: jfp
+      POSTGRES_DB: shorturl
+    
+    # ports:
+    #   - "5432:5432"
+    
+    restart: always
+
   url-encoder:
     build:
+      context: ./services/url_encoder/
+      dockerfile: Dockerfile
+    
+    container_name: url-encoder
+    
+    # ports:
+    #   - "8080:8080"
+    
+    environment:
+      - CONN_STRINGS=postgresql://jfp:jfp@pg:5432/shorturl
+    
+    depends_on:
+      - db
+
+    restart: always
+
+  api:
+    build:
+      context: ./services/api/
+      dockerfile: Dockerfile
+    
+    container_name: api
+    
+    # ports:
+    #   - "8080:8080"
+    
+    depends_on:
+      - "url-encoder"
+      
+    restart: always
