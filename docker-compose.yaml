@@ -35,8 +35,7 @@ services:
     container_name: url-encoder
     
     environment:
-      - CONN_STRINGS=postgresql://jfp:jfp@pg1:5432/shorturl
-      - CONN_STRINGS=postgresql://jfp:jfp@pg2:5432/shorturl
+      - CONN_STRINGS=postgresql://jfp:jfp@pg1:5432/shorturl,postgresql://jfp:jfp@pg2:5432/shorturl
       - PYTHONUNBUFFERED=1
 
     depends_on:
@@ -53,9 +52,11 @@ services:
     container_name: api
 
     environment:
-      - CONN_STRINGS=postgresql://jfp:jfp@pg:5432/shorturl
-      - CONN_STRINGS=postgresql://jfp:jfp@pg2:5432/shorturl
+      - CONN_STRINGS=postgresql://jfp:jfp@pg1:5432/shorturl,postgresql://jfp:jfp@pg2:5432/shorturl
       - PYTHONUNBUFFERED=1
+    
+    ports:
+      - "8080:8080"
     
     depends_on:
       - "url-encoder"
