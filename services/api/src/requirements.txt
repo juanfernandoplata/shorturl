@@ -1,2 +1,5 @@
+psycopg[binary]
+psycopg[pool]
+
 grpcio
 grpcio-tools
