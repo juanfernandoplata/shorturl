@@ -23,7 +23,6 @@ class UrlEncoder( UrlEncoderServicer ):
         max_short = "000000"
 
         for string in self.get_conn_strings():
-            print( string )
             with pg.connect( string ) as conn:
                 with conn.cursor() as cur:
                     cur.execute(f"""
@@ -35,23 +34,22 @@ class UrlEncoder( UrlEncoderServicer ):
 
                     if ( row := cur.fetchone() ) != None:
                         if row[ 0 ] > max_short:
-                            print( "EPA" * 100 )
                             max_short = row[ 0 ]
 
-        self.count = base62.decode( max_short )
+        # print( "MS:", max_short )
+        self.count = base62.decode( max_short ) + 1
 
     def __init__( self ):
         super().__init__()
         self.set_count()
     
-    def gen_id( self ):
-        url_id = self.count
+    def gen_encoding( self ):
+        encoded = base62.encode( self.count )
         self.count += 1
 
-        return url_id
-    
-    def gen_encoding( self ):
-        return base62.encode( self.gen_id() )
+        # print( "ENCODED:", encoded )
+
+        return encoded
 
     def encode( self, request, context ):
         return EncodeRes( encoded = self.gen_encoding() )

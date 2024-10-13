@@ -3,31 +3,7 @@
 
 #include <math.h>
 
-const char BASE[] = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
-// static PyObject * encode( PyObject * self, PyObject * args ) {
-//     int n;
-
-//     if ( !PyArg_ParseTuple( args, "i", &n ) ) {
-//         return NULL;
-//     }
-
-//     if ( !n ) {
-//         return Py_BuildValue( "s", "0\0" );
-//     }
-
-//     char encoded[ 7 ];
-
-//     int i = 0;
-//     while ( n > 0 ) {
-//         encoded[ i++ ] = BASE[ n % 62 ];
-//         n /= 62;
-//     }
-
-//     encoded[ i ] = '\0';
-
-//     return Py_BuildValue( "s", encoded );
-// }
+const char BASE[] = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 static PyObject * encode( PyObject * self, PyObject * args ) {
     int n;

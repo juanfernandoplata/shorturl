@@ -1,13 +1,10 @@
-FROM python:3.12.7-slim-bookworm
+FROM python-grpc
 
 WORKDIR /root
 
 COPY ./src/ .
 
-RUN apt-get update && apt-get install -y gcc
-
-RUN python -m pip install --no-cache-dir --upgrade pip && \
-    python -m pip install --no-cache-dir -r requirements.txt
+RUN python -m pip install --no-cache-dir -r requirements.txt
 
 WORKDIR /root/_base62
 
