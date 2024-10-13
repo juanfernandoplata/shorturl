@@ -1,3 +1,6 @@
+uvicorn
+fastapi
+
 psycopg[binary]
 psycopg[pool]
 
