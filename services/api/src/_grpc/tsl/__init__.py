@@ -7,4 +7,4 @@ def _load_from_file( path ):
 
 ROOT_CERTIFICATES = _load_from_file( "server.crt" )
 CLIENT_CERTIFICATE = _load_from_file( "client.crt" )
-CLIENT_KEY = _load_from_file( "server.key" )
+CLIENT_KEY = _load_from_file( "client.key" )
