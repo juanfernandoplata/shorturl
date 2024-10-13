@@ -12,4 +12,4 @@ RUN sed -i \
     '6s/.*/from .import url_encoder_pb2 as url__encoder__pb2/' \
     ./_grpc/url_encoder_pb2_grpc.py
 
-CMD [ "python", "client.py" ]
+CMD [ "uvicorn", "--host", "0.0.0.0", "--port", "8080", "main:app" ]
