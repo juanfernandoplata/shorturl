@@ -1,3 +1,5 @@
+import signal
+
 from concurrent import futures
 
 import grpc
@@ -17,7 +19,7 @@ class UrlEncoder( UrlEncoderServicer ):
             print( "FATAL: environment variable CONN_STRINGS was not found" )
             exit()
         
-        return conn_strings.split()
+        return conn_strings.split( "," )
     
     def set_count( self ):
         max_short = "000000"
@@ -47,8 +49,6 @@ class UrlEncoder( UrlEncoderServicer ):
         encoded = base62.encode( self.count )
         self.count += 1
 
-        # print( "ENCODED:", encoded )
-
         return encoded
 
     def encode( self, request, context ):
@@ -71,6 +71,11 @@ def serve():
     server.add_secure_port( "0.0.0.0:50051", credentials )
     
     server.start()
+
+    signal.signal(
+        signal.SIGTERM,
+        lambda signum, frame: server.stop()
+    )
     
     server.wait_for_termination()
 
