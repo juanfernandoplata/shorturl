@@ -1,18 +1,29 @@
 services:
-  db:
+  pg1:
     build:
       context: ./services/postgres/
       dockerfile: Dockerfile
     
-    container_name: pg
+    container_name: pg1
     
     environment:
       POSTGRES_USER: jfp
       POSTGRES_PASSWORD: jfp
       POSTGRES_DB: shorturl
     
-    # ports:
-    #   - "5432:5432"
+    restart: always
+  
+  pg2:
+    build:
+      context: ./services/postgres/
+      dockerfile: Dockerfile
+    
+    container_name: pg2
+    
+    environment:
+      POSTGRES_USER: jfp
+      POSTGRES_PASSWORD: jfp
+      POSTGRES_DB: shorturl
     
     restart: always
 
@@ -23,14 +34,14 @@ services:
     
     container_name: url-encoder
     
-    # ports:
-    #   - "8080:8080"
-    
     environment:
-      - CONN_STRINGS=postgresql://jfp:jfp@pg:5432/shorturl
-    
+      - CONN_STRINGS=postgresql://jfp:jfp@pg1:5432/shorturl
+      - CONN_STRINGS=postgresql://jfp:jfp@pg2:5432/shorturl
+      - PYTHONUNBUFFERED=1
+
     depends_on:
-      - db
+      - pg1
+      - pg2
 
     restart: always
 
@@ -40,9 +51,11 @@ services:
       dockerfile: Dockerfile
     
     container_name: api
-    
-    # ports:
-    #   - "8080:8080"
+
+    environment:
+      - CONN_STRINGS=postgresql://jfp:jfp@pg:5432/shorturl
+      - CONN_STRINGS=postgresql://jfp:jfp@pg2:5432/shorturl
+      - PYTHONUNBUFFERED=1
     
     depends_on:
       - "url-encoder"
