@@ -1,0 +1,72 @@
+services:
+  pg0:
+    image: surl-pg0
+    container_name: surl-pg0
+    
+    environment:
+      POSTGRES_USER: pg
+      POSTGRES_PASSWORD: pg
+      POSTGRES_DB: shorturl
+    
+    restart: always
+
+  pg1:
+    image: surl-pg1
+    container_name: surl-pg1
+    
+    environment:
+      POSTGRES_USER: pg
+      POSTGRES_PASSWORD: pg
+      POSTGRES_DB: shorturl
+    
+    restart: always
+
+  api0:
+    image: surl-api0
+    container_name: surl-api0
+
+    environment:
+      - CONN_STRINGS=postgresql://pg:pg@pg0:5432/shorturl,postgresql://pg:pg@pg1:5432/shorturl
+      - PYTHONUNBUFFERED=1
+    
+    # ports:
+    #   - "80:80"
+    
+    depends_on:
+      - pg0
+      - pg1
+
+      
+    restart: always
+
+  api1:
+    image: surl-api1
+    container_name: surl-api1
+
+    environment:
+      - CONN_STRINGS=postgresql://pg:pg@pg0:5432/shorturl,postgresql://pg:pg@pg1:5432/shorturl
+      - PYTHONUNBUFFERED=1
+    
+    # ports:
+    #   - "80:80"
+    
+    depends_on:
+      - pg0
+      - pg1
+
+      
+    restart: always
+
+  back:
+    image: surl-back
+    container_name: surl-back
+    
+    ports:
+      - "80:80"
+    
+    depends_on:
+      - api0
+      - api1
+
+      
+    restart: always

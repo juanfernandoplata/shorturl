@@ -1,0 +1,11 @@
+  _HOSTNAME:
+    image: _IMG
+    container_name: _CONT
+    
+    ports:
+      - "80:80"
+    
+    depends_on:
+_DEPS_ON
+      
+    restart: always

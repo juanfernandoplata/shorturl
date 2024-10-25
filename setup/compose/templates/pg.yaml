@@ -1,0 +1,11 @@
+  _HOSTNAME:
+    image: _IMG
+    container_name: _CONT
+    
+    environment:
+      POSTGRES_USER: pg
+      POSTGRES_PASSWORD: pg
+      POSTGRES_DB: shorturl
+    
+    restart: always
+
