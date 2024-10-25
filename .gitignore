@@ -1,5 +1,6 @@
-/trash/
 /venv/
+/aux/
+/trash/
 
 /services/url_encoder/_base62/_base62.egg-info/
 /services/url_encoder/_base62/build/

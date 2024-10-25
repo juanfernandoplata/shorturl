@@ -2,25 +2,27 @@ from os import environ
 
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException, BackgroundTasks
+from fastapi.responses import RedirectResponse
 
 from sharding import PgShardManager
 
-import grpc
-from _grpc.url_encoder_pb2_grpc import UrlEncoderStub
-from _grpc.url_encoder_pb2 import EncodeReq
+from cache import LFULRUCache
 
-from _grpc import tsl
+import base62
+
+if ( HOSTNAME := environ.get( "HOSTNAME" ) ) == None:
+    print( "FATAL: environment variable HOSTNAME was not found" )
+    exit()
+
+HOSTNAME = "http://localhost"
 
 dbs = None
-
-channel = None
-encoder = None
-
+cache = None
 app = FastAPI()
 
 async def app_startup():
-    global dbs, channel, encoder
+    global dbs, cache
 
     if ( conn_strings := environ.get( "CONN_STRINGS" ) ) == None:
         print( "FATAL: environment variable CONN_STRINGS was not found" )
@@ -28,31 +30,24 @@ async def app_startup():
     
     conn_strings = conn_strings.split( "," )
     
+    shards_keys = [ f"pg{i}" for i in range( len( conn_strings ) ) ]
+
     conn_dict = dict( zip(
-        [ f"pg{i}" for i in range( 1, len( conn_strings ) + 1 ) ],
+        shards_keys,
         conn_strings
     ))
 
     dbs = PgShardManager(
         conn_dict,
-        lambda key: "pg1" if ord( key[ -1 ] ) < 86 else "pg2"
+        ModShardKeyScheme( "pg", len( shards_keys ) )
     )
-
-    credentials = grpc.ssl_channel_credentials(
-        root_certificates = tsl.ROOT_CERTIFICATES,
-        certificate_chain = tsl.CLIENT_CERTIFICATE,
-        private_key = tsl.CLIENT_KEY,
-    )
-
-    channel = grpc.secure_channel( "url-encoder:50051", credentials )
-
-    encoder = UrlEncoderStub( channel )
 
     await dbs.open()
 
+    cache = LFULRUCache( max_size = 3 )
+
 async def app_shutdown():
     await dbs.close()
-    channel.close()
 
 @asynccontextmanager
 async def lifespan( app ):
@@ -62,13 +57,58 @@ async def lifespan( app ):
 
 app = FastAPI( lifespan = lifespan )
 
-@app.post( "/generate" )
-async def search( url: str ):
-    encoded = encoder.encode( EncodeReq() ).encoded
-
-    async with dbs.connection( encoded ) as conn:
+async def set_short_long( db, url_id, short, long ):
+    async with dbs.select( db ) as conn:
         await conn.execute( f"""
-            insert into url values('{encoded}')
+            update url set
+            short = '{short}',
+            long = '{long}'
+            where url_id = {url_id}
         """ )
 
-    return { "short": encoded }
+@app.post( "/generate" )
+async def search( url: str, bg: BackgroundTasks ):
+    db, connection = dbs.balance( ret_db = True )
+
+    async with connection as conn:
+        curr = await conn.execute( f"""
+            insert into url default values
+            returning url_id
+        """ )
+
+        url_id = ( await curr.fetchone() )[ 0 ]
+
+        short = base62.encode( url_id )
+
+        bg.add_task( set_short_long, db, url_id, short, url )
+
+    return { "short": f"{HOSTNAME}/{short}" }
+
+@app.get( "/{short}" )
+async def search( short: str, bg: BackgroundTasks ):
+    if ( long := cache.get( short ) ):
+        print( "CACHE HIT" )
+        return RedirectResponse( long )
+    
+    print( "CACHE MISS" )
+
+    async with dbs.find( short ) as conn:
+        curr = await conn.execute( f"""
+            select long
+            from url
+            where short = '{short}'
+        """ )
+
+        if ( long := ( await curr.fetchone() ) ) == None:
+            raise HTTPException(
+                status_code = 404,
+                detail = "URL was not found"
+            )
+        
+        long = long[ 0 ]
+
+        # Launch bg task for metrics micro-service
+    
+    cache.set( short, long )
+
+    return RedirectResponse( long )

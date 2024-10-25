@@ -1,5 +1,10 @@
-create table url(
-    short varchar( 6 )
-);
+create sequence shard_seq 
+increment by 2
+start with 1
+minvalue 1;
 
-insert into url values ( '0a341z' );
+create table url(
+    url_id int default nextval( 'shard_seq' ) primary key,
+    short varchar( 6 ) unique,
+    long varchar( 256 )
+);
