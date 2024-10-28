@@ -1,4 +1,0 @@
-grpcio
-grpcio-tools
-
-psycopg[binary]
