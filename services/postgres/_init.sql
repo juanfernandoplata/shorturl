@@ -1,7 +1,7 @@
 create sequence shard_seq 
-increment by _INCR
-start with _START
-minvalue _START;
+increment by $INCR
+start with $START
+minvalue $START;
 
 create table url(
     url_id int default nextval( 'shard_seq' ) primary key,
