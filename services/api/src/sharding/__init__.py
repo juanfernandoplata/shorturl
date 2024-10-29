@@ -14,11 +14,21 @@ class PgShardManager:
     def __init__( self, conn_dict, key_scheme: ShardKeyScheme ):
         self.conn_dict = conn_dict
         self.key_scheme = key_scheme
+        self.pools = None
     
-    async def open( self ):
+    async def open( self, pool_size = 10 ):
+        if self.pools:
+            return
+        
         self.pools = dict()
         for key, string in self.conn_dict.items():
-            self.pools[ key ] = AsyncConnectionPool( string, open = False )
+            self.pools[ key ] = AsyncConnectionPool(
+                string,
+                open = False,
+                min_size = pool_size,
+                max_size = pool_size
+            )
+
             await self.pools[ key ].open()
     
     async def close( self ):
