@@ -21,7 +21,13 @@ services:
     
     restart: always
 
-  api0:
+  redis:
+    image: surl-redis
+    container_name: surl-redis
+      
+    restart: always
+
+  api0 :
     image: surl-api0
     container_name: surl-api0
 
@@ -29,17 +35,13 @@ services:
       - CONN_STRINGS=postgresql://pg:pg@pg0:5432/shorturl,postgresql://pg:pg@pg1:5432/shorturl
       - PYTHONUNBUFFERED=1
     
-    # ports:
-    #   - "80:80"
-    
     depends_on:
       - pg0
       - pg1
-
       
     restart: always
 
-  api1:
+  api1 :
     image: surl-api1
     container_name: surl-api1
 
@@ -47,26 +49,21 @@ services:
       - CONN_STRINGS=postgresql://pg:pg@pg0:5432/shorturl,postgresql://pg:pg@pg1:5432/shorturl
       - PYTHONUNBUFFERED=1
     
-    # ports:
-    #   - "80:80"
-    
     depends_on:
       - pg0
       - pg1
-
       
     restart: always
 
-  back:
-    image: surl-back
-    container_name: surl-back
+  nginx:
+    image: surl-nginx
+    container_name: surl-nginx
     
     ports:
       - "80:80"
     
     depends_on:
-      - api0
-      - api1
-
+      - pg0
+      - pg1
       
     restart: always

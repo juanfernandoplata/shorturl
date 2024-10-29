@@ -19,8 +19,10 @@ for (( i = 0; i < NUM_DBS; i++ )); do
     docker rmi "$PREFIX-pg$i"
 done
 
+docker rmi "$PREFIX-redis"
+
 for (( i = 0; i < NUM_APIS; i++ )); do
     docker rmi "$PREFIX-api$i"
 done
 
-docker rmi "$PREFIX-back"
+docker rmi "$PREFIX-nginx"

@@ -11,27 +11,66 @@ if [ $# -ne 3 ]; then
     exit 1
 fi
 
+get_indent() {
+    file=$1
+    var=$2
+
+    indent=$(grep -o "^[ \s]*$var" "$file")
+
+    i=$((${#indent} - ${#var}))
+    
+    indent=${indent::i}
+
+    echo "$indent"
+}
+
+build_list() {
+    file=$1
+    var=$2
+    prefix=$3
+    suffix=$4
+    rm=$5
+    n=$6
+
+    list=''
+
+    for (( i = 0; i < $n; i++ )); do
+        list+="$prefix$i$suffix"
+    done
+
+    if [ $rm -ne 0 ]; then
+        list=${list::-$rm}
+    fi
+
+    echo "$list"
+}
+
 PREFIX=$1
 NUM_DBS=$2
 NUM_APIS=$3
 
 for (( i = 0; i < NUM_DBS; i++ )); do
-    sed -e "s/_INCR/$NUM_DBS/" \
-        -e "s/_START/$i/" \
+    sed -e "s/\$INCR/$NUM_DBS/" \
+        -e "s/\$START/$i/" \
         ../../services/postgres/_init.sql \
         > ../../services/postgres/init.sql
     
     docker build -t "$PREFIX-pg$i" ../../services/postgres/
 done
 
-apis=''
+rm ../../services/postgres/init.sql
 
-for (( i = 0; i < NUM_APIS; i++ )); do
+indent=$(get_indent '../../services/nginx/_nginx.conf' '$APIS')
+apis=$(build_list '../../services/nginx/_nginx.conf' '$APIS' "${indent}server api" ':80;\n' 2 $NUM_APIS)
+
+docker build -t "$PREFIX-redis" ../../services/redis/
+
+for (( i = 0; i < NUM_APIS; i++ )); do    
     docker build -t "$PREFIX-api$i" ../../services/api/
-
-    apis+="        server api$i:80;\n"
 done
 
-sed -e "s/_APIS/$apis/" ../../services/back/_nginx.conf > ../../services/back/nginx.conf
+sed -e "s/^[ \s]*\$APIS/$apis/" ../../services/nginx/_nginx.conf > ../../services/nginx/nginx.conf
 
-docker build -t "$PREFIX-back" ../../services/back/
+docker build -t "$PREFIX-nginx" ../../services/nginx/
+
+rm ../../services/nginx/nginx.conf
