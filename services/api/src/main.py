@@ -50,8 +50,6 @@ pg = None
 redis = None
 cache = None
 
-# app = FastAPI()
-
 async def app_startup():
     global shard_mannager, pg, redis, cache
     
