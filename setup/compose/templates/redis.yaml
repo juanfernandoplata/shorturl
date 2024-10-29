@@ -1,0 +1,6 @@
+  $SERV:
+    image: $IMG
+    container_name: $CONT
+      
+    restart: always
+

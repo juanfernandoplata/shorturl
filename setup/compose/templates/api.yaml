@@ -1,16 +1,13 @@
-  _HOSTNAME:
-    image: _IMG
-    container_name: _CONT
+  $SERV :
+    image: $IMG
+    container_name: $CONT
 
     environment:
-      - CONN_STRINGS=_CONN_STRINGS
+      - CONN_STRINGS=$CONNS
       - PYTHONUNBUFFERED=1
     
-    # ports:
-    #   - "80:80"
-    
     depends_on:
-_DEPS_ON
+      $DEPS
       
     restart: always
 

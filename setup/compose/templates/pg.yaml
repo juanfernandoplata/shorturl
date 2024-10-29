@@ -1,6 +1,6 @@
-  _HOSTNAME:
-    image: _IMG
-    container_name: _CONT
+  $SERV:
+    image: $IMG
+    container_name: $CONT
     
     environment:
       POSTGRES_USER: pg
