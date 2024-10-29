@@ -1,11 +1,5 @@
-/venv/
 /aux/
+/venv/
 /trash/
-
-/services/url_encoder/_base62/_base62.egg-info/
-/services/url_encoder/_base62/build/
-/services/url_encoder/_base62/dist/
-
-/services/url_encoder/_grpc/*pb2*
 
 __pycache__/
