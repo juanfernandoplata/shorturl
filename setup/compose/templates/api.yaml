@@ -3,8 +3,10 @@
     container_name: $CONT
 
     environment:
-      - CONN_STRINGS=$CONNS
-      - PYTHONUNBUFFERED=1
+      - DHOSTNAME=$CONT
+      - PGS=$PGS
+      - REDIS=$REDIS
+      # - PYTHONUNBUFFERED=1
     
     depends_on:
       $DEPS

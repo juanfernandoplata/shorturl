@@ -66,13 +66,14 @@ sed -e "s/\$SERV/redis/" \
 indent=$(get_indent './templates/api.yaml' '$DEPS')
 pg_list=$(build_list './templates/api.yaml' '$DEPS' "${indent}- pg" '\n' 2 $NUM_DBS)
 
-conn_strings=$(build_list './templates/api.yaml' '$CONNS' 'postgresql://pg:pg@pg' ':5432/shorturl,' 1 $NUM_DBS)
+conn_strings=$(build_list './templates/api.yaml' '$PGS' 'postgresql://pg:pg@pg' ':5432/shorturl,' 1 $NUM_DBS)
 
 for (( i = 0; i < NUM_APIS; i++ )); do
     sed -e "s/\$SERV/api$i/" \
         -e "s/\$IMG/$PREFIX-api$i/" \
         -e "s/\$CONT/$PREFIX-api$i/" \
-        -e "s|\$CONNS|$conn_strings|" \
+        -e "s|\$PGS|$conn_strings|" \
+        -e "s|\$REDIS|redis://$PREFIX-redis:6379|" \
         -e "s/^[ \s]*\$DEPS/$pg_list/" \
         ./templates/api.yaml \
         >> ./docker-compose.yaml
