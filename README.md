@@ -43,7 +43,7 @@ Before launching the system, you can define a few settings:
 - **`NUM_DBS`**: The number of PostgreSQL shards.
 - **`NUM_SHARDS`**: The number of FastAPI instances.
 
-These values can be configured in the **`short-url/setup/.env`** file, where the system's **environment variables** are stored.
+These values can be configured in the **`shorturl/setup/.env`** file, where the system's **environment variables** are stored.
 
 You can also specify the prefix **`(PREFIX)`** that the build phase will use for naming the created Docker images and containers. The default value is **`surl`**.
 
